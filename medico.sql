@@ -102,7 +102,54 @@ INSERT INTO `patient` (`name`, `mail`, `pwd`, `age`, `BMI`, `location`, `gender`
 -- Table structure for table `queries`
 --
 
+CREATE TABLE `queries` (
+  `sno` int NOT NULL,
+  `question` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `answer` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'Nil',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'Nil'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `queries`
+--
+
+INSERT INTO `queries` (`sno`, `question`, `answer`, `status`) VALUES
+(4, 'How to do firstaid for Snake bit', 'Wash the wound with water and tie with cloth', 'answered'),
+(5, 'what to do as precaution when black fungus detected', 'Be clam and take anti fugus medicine and get first aid', 'answered'),
+(6, 'how to do first aid for heat burns', 'Nil', 'Nil');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `doctor`
+--
+ALTER TABLE `doctor`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `patient`
+--
+ALTER TABLE `patient`
+  ADD PRIMARY KEY (`mail`);
+
+--
+-- Indexes for table `queries`
+--
+ALTER TABLE `queries`
+  ADD PRIMARY KEY (`sno`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `queries`
+--
+ALTER TABLE `queries`
+  MODIFY `sno` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
