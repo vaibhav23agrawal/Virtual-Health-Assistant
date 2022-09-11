@@ -201,4 +201,96 @@ def logout():
         return redirect(url_for('login'))
 
 
+@app.route('/doctor', methods=["POST", "GET"])
+def doctorLogin():
+    msg = ''
+    if request.method == 'POST' and 'mail' in request.form:
+        mail = request.form['mail']
+        pwd = request.form['pwd']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute(
+            'select * from doctor where mail= %s and pwd =%s', (mail, pwd))
+        doctor = cursor.fetchone()
+        if doctor:
+            session['loggedin'] = True
+            session['d_id'] = doctor['id']
+            session['d_pwd'] = doctor['pwd']
+            return redirect(url_for('docpage'))
+        else:
+            return render_template('doctor_login.html', msg='Invalid Credentials')
 
+    return render_template('doctor_login.html', msg='')
+
+
+@app.route('/docpage/')
+def docpage():
+    if 'd_id' in session:
+        id = session.get('d_id')
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('select * from doctor where id= %s ', [id])
+        doctor = cursor.fetchone()
+
+        cursor.execute('select * from queries')
+        queries = cursor.fetchall()
+
+        cursor.execute('SELECT a.name , b.patient_mail ,b.status,b.timing  from patient a, consult b where a.mail =  b.patient_mail and b.doctor_id= %s and b.status=%s', (id, 'Accepted'))
+        check = cursor.fetchall()
+        if check:
+            check = len(check)
+        else:
+            check = 0
+        cursor.execute(
+            'SELECT a.name , b.patient_mail ,b.status,b.timing  from patient a, consult b where a.mail =  b.patient_mail and b.doctor_id= %s ', [id])
+        reques = cursor.fetchall()
+
+        return render_template('doctor_main_page.html', reques=reques, len=len(reques), doctor=doctor, check=check, queries=queries, len2=len(queries))
+    else:
+        return render_template('doctor_login.html', msg='')
+
+
+@app.route('/consult_update', methods=["POST", "GET"])
+def consult_update():
+    if 'd_id' in session and request.method == 'POST':
+        id = session.get('d_id')
+        patient_mail = request.form['patient_mail']
+        bday = request.form['bday']
+        timing = request.form['timing']
+
+        timing = bday + " "+timing
+        status = 'Accepted'
+
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('update consult set status = %s, timing=%s  where patient_mail = %s and doctor_id = %s',
+                       (status, timing, patient_mail, id))
+        mysql.connection.commit()
+        return redirect(url_for('docpage'))
+    else:
+        return render_template('doctor_login.html', msg='')
+
+
+@app.route('/answerquery', methods=["POST", "GET"])
+def answerquery():
+    if 'd_id' in session and request.method == 'POST':
+        sno = request.form['sno']
+        answer = request.form['answer']
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute(
+            'update queries set answer = %s, status = %s where sno= %s ', (answer, 'answered', sno))
+        mysql.connection.commit()
+        return redirect(url_for('docpage'))
+    else:
+        return render_template('doctor_login.html', msg='')
+
+
+@app.route('/doctorLogout/')
+def doctorLogout():
+    if 'd_id' in session:
+        # Remove session data, this will log the user out
+        session.clear()
+
+        # Redirect to login page
+        return redirect(url_for('doctorLogin'))
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
